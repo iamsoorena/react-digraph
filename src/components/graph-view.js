@@ -343,7 +343,7 @@ class GraphView extends Component {
       if(!self.props.readOnly){
         var d = d3.select(this).datum();
         // Move the node back to the original z-index
-        if (oldSibling) {
+        if (oldSibling && oldSibling.parentElement) {
           oldSibling.parentElement.insertBefore(this, oldSibling);
         }
         self.props.onUpdateNode(d);
@@ -489,7 +489,7 @@ class GraphView extends Component {
 
     if(d3.event.target.tagName != 'path') return false; // If the handle is clicked
 
-    const xycoords = d3.mouse(event.target);
+    const xycoords = d3.mouse(d3.event.target);
     const target = this.props.getViewNode(d.target);
     const dist = getDistance({x: xycoords[0], y: xycoords[1]}, target);
 
@@ -658,6 +658,11 @@ class GraphView extends Component {
   getEdgeHandleTransformation = (edge) => {
     let src = this.props.getViewNode(edge.source);
     let trg = this.props.getViewNode(edge.target);
+
+    if (!(src && trg)) {
+      console.warn("Unable to get both source and target for ", edge);
+      return "";
+    }
 
     let origin = getMidpoint(src, trg);
     let x = origin.x;
