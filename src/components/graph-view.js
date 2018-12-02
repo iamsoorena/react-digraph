@@ -49,7 +49,7 @@ function makeStyles(primary='dodgerblue', light='white', dark='black', backgroun
         margin: 0,
         display: 'flex',
         boxShadow: 'none',
-        opacity: 0.5,
+        opacity: 1,
         background: background,
         transition: "opacity 0.167s"
       },
@@ -85,8 +85,8 @@ function makeStyles(primary='dodgerblue', light='white', dark='black', backgroun
     },
     text: {
       base:{
-        fill: dark,
-        stroke: dark
+        fill: light,
+        stroke: 'none'
       },
       selected: {
         fill: light,
@@ -96,7 +96,7 @@ function makeStyles(primary='dodgerblue', light='white', dark='black', backgroun
     edge: {
       base: {
         color: light,
-        stroke: primary,
+        stroke: '#1F4577',
         strokeWidth: '2px',
         markerEnd: 'url(#end-arrow)',
         cursor: 'pointer'
@@ -301,8 +301,9 @@ class GraphView extends Component {
             swapErrBack()
           }
         } else {
-          self.props.onCreateEdge(sourceNode, hoveredNode)
-          self.renderView()
+          self.props.onCreateEdge(sourceNode, hoveredNode).then(() => {
+            self.renderView()
+          })
         }
       } else {
         if (swapErrBack){
@@ -368,13 +369,15 @@ class GraphView extends Component {
   handleDelete = () => {
     if (this.props.readOnly) return;
     if (this.props.selected) {
-      const selected = this.props.selected;
+      const selected = this.props.selected
       if (!selected.source && this.props.canDeleteNode(selected)) {
-        this.props.onDeleteNode(selected);
-        this.props.onSelectNode(null);
+        this.props.onDeleteNode(selected).then(() => {
+          this.props.onSelectNode(null)
+        })
       } else if (selected.source && this.props.canDeleteEdge(selected)) {
-        this.props.onDeleteEdge(selected);
-        this.props.onSelectNode(null);
+        this.props.onDeleteEdge(selected).then(() => {
+          this.props.onSelectNode(null)
+        })
       }
     }
   }
@@ -400,15 +403,16 @@ class GraphView extends Component {
     if (this.state.selectingNode) {
       this.setState({
         selectingNode: false
-      });
+      })
     } else {
-      this.props.onSelectNode(null);
+      this.props.onSelectNode(null)
 
       if (!this.props.readOnly && d3.event.shiftKey) {
-          var xycoords = d3.mouse(d3.event.target);
-          this.props.onCreateNode(xycoords[0], xycoords[1]);
-          this.renderView();
-        }
+        var xycoords = d3.mouse(d3.event.target)
+        this.props.onCreateNode(xycoords[0], xycoords[1], d3.event).then(() => {
+          this.renderView()
+        })
+      }
     }
   }
 
@@ -489,7 +493,7 @@ class GraphView extends Component {
 
     if(d3.event.target.tagName != 'path') return false; // If the handle is clicked
 
-    const xycoords = d3.mouse(event.target);
+    const xycoords = d3.mouse(d3.event.target);
     const target = this.props.getViewNode(d.target);
     const dist = getDistance({x: xycoords[0], y: xycoords[1]}, target);
 
@@ -668,6 +672,23 @@ class GraphView extends Component {
     return `translate(${x}, ${y}) rotate(${theta}) translate(${offset}, ${offset})`
   }
 
+  getLabelTransformation = (edge) => {
+    let src = this.props.getViewNode(edge.source);
+    let trg = this.props.getViewNode(edge.target);
+    let rotated = false
+
+    let origin = getMidpoint(src, trg);
+    let x = origin.x;
+    let y = origin.y;
+    let theta = getTheta(src, trg)*180/Math.PI;
+    if(theta > 90 || theta < -90){
+      theta = theta + 180
+      rotated = true
+    }
+
+    return [`translate(${x}, ${y}) rotate(${theta}) translate(0,-5)`, rotated]
+  }
+
   // Returns a d3 transformation string from node data
   getNodeTransformation = (node) => {
     return 'translate(' + node.x + ',' + node.y + ')';
@@ -685,6 +706,30 @@ class GraphView extends Component {
       this.state.styles.edge.baseString
   }
 
+  // Renders 'node.title' into node element
+  renderEdgeLabels = (d, domNode, trans) => {
+    let d3Node = d3.select(domNode);
+    let title = ' '
+    if (d.label_from && d.label_to) {
+      title = trans[1] ? `${d.label_to} ↔ ${d.label_from}` : `${d.label_from} ↔ ${d.label_to}`
+    }
+
+    d3Node.selectAll('text').remove()
+
+    let el = d3Node.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('style',  `font-size: 11px; stroke: none`)
+      // .attr('dy', textOffset)
+      .attr("transform", trans[0]);
+
+
+    if (title) {
+      // User defined/secondary text
+      el.append('tspan').text(title).attr('x', 0)
+      el.append('title').text(title);
+    }
+  }
+
   getTextStyle = (d, selected) => {
     return d === selected ?
       this.state.styles.text.selectedString :
@@ -699,8 +744,8 @@ class GraphView extends Component {
     let titleText = title.length <= this.props.maxTitleChars ? title :
       `${title.substring(0, this.props.maxTitleChars)}...`;
 
-    let lineOffset = 18;
-    let textOffset = d.type === this.props.emptyType ? -9 : 18;
+    let lineOffset = 5;
+    let textOffset = d.type === this.props.emptyType ? 18 : 18;
 
     d3Node.selectAll("text").remove();
 
@@ -1044,6 +1089,8 @@ GraphView.defaultProps = {
 
     let style = graphView.getEdgeStyle(datum, graphView.props.selected);
     let trans = graphView.getEdgeHandleTransformation(datum)
+    let labelTrans = graphView.getLabelTransformation(datum)
+
     d3.select(domNode)
       .attr("style", style)
       .select("use")
@@ -1055,6 +1102,7 @@ GraphView.defaultProps = {
     d3.select(domNode)
       .select('path')
         .attr('d', graphView.getPathDescription);
+    graphView.renderEdgeLabels(datum, domNode, labelTrans);
   },
   renderNode: (graphView, domNode, datum, index, elements) => {
     // For new nodes, add necessary child domNodes
