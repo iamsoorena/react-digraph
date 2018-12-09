@@ -236,9 +236,8 @@ var GraphView = function (_Component) {
               swapErrBack();
             }
           } else {
-            self.props.onCreateEdge(sourceNode, hoveredNode).then(function () {
-              self.renderView();
-            });
+            self.props.onCreateEdge(sourceNode, hoveredNode);
+            self.renderView();
           }
         } else {
           if (swapErrBack) {
@@ -305,13 +304,11 @@ var GraphView = function (_Component) {
       if (_this.props.selected) {
         var selected = _this.props.selected;
         if (!selected.source && _this.props.canDeleteNode(selected)) {
-          _this.props.onDeleteNode(selected).then(function () {
-            _this.props.onSelectNode(null);
-          });
+          _this.props.onDeleteNode(selected);
+          _this.props.onSelectNode(null);
         } else if (selected.source && _this.props.canDeleteEdge(selected)) {
-          _this.props.onDeleteEdge(selected).then(function () {
-            _this.props.onSelectNode(null);
-          });
+          _this.props.onDeleteEdge(selected);
+          _this.props.onSelectNode(null);
         }
       }
     };
@@ -343,9 +340,8 @@ var GraphView = function (_Component) {
 
         if (!_this.props.readOnly && d3.event.shiftKey) {
           var xycoords = d3.mouse(d3.event.target);
-          _this.props.onCreateNode(xycoords[0], xycoords[1], d3.event).then(function () {
-            _this.renderView();
-          });
+          _this.props.onCreateNode(xycoords[0], xycoords[1]);
+          _this.renderView();
         }
       }
     };
@@ -1099,9 +1095,7 @@ GraphView.defaultProps = {
   zoomDur: 750,
   graphControls: true,
   renderEdge: function renderEdge(graphView, domNode, datum, index, elements) {
-    // console.log('inputs for renderEdge : ',{
-    //   graphView, domNode, datum, index, elements
-    // } )
+
     // For new edges, add necessary child domNodes
     if (!domNode.hasChildNodes()) {
       d3.select(domNode).append("path");
