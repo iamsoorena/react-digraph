@@ -301,9 +301,8 @@ class GraphView extends Component {
             swapErrBack()
           }
         } else {
-          self.props.onCreateEdge(sourceNode, hoveredNode).then(() => {
-            self.renderView()
-          })
+          self.props.onCreateEdge(sourceNode, hoveredNode)
+          self.renderView()
         }
       } else {
         if (swapErrBack){
@@ -369,15 +368,13 @@ class GraphView extends Component {
   handleDelete = () => {
     if (this.props.readOnly) return;
     if (this.props.selected) {
-      const selected = this.props.selected
+      const selected = this.props.selected;
       if (!selected.source && this.props.canDeleteNode(selected)) {
-        this.props.onDeleteNode(selected).then(() => {
-          this.props.onSelectNode(null)
-        })
+        this.props.onDeleteNode(selected);
+        this.props.onSelectNode(null);
       } else if (selected.source && this.props.canDeleteEdge(selected)) {
-        this.props.onDeleteEdge(selected).then(() => {
-          this.props.onSelectNode(null)
-        })
+        this.props.onDeleteEdge(selected);
+        this.props.onSelectNode(null);
       }
     }
   }
@@ -403,16 +400,15 @@ class GraphView extends Component {
     if (this.state.selectingNode) {
       this.setState({
         selectingNode: false
-      })
+      });
     } else {
-      this.props.onSelectNode(null)
+      this.props.onSelectNode(null);
 
       if (!this.props.readOnly && d3.event.shiftKey) {
-        var xycoords = d3.mouse(d3.event.target)
-        this.props.onCreateNode(xycoords[0], xycoords[1], d3.event).then(() => {
-          this.renderView()
-        })
-      }
+          var xycoords = d3.mouse(d3.event.target);
+          this.props.onCreateNode(xycoords[0], xycoords[1]);
+          this.renderView();
+        }
     }
   }
 
