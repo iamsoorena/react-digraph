@@ -340,7 +340,7 @@ var GraphView = function (_Component) {
 
         if (!_this.props.readOnly && d3.event.shiftKey) {
           var xycoords = d3.mouse(d3.event.target);
-          _this.props.onCreateNode(xycoords[0], xycoords[1]);
+          _this.props.onCreateNode(xycoords[0], xycoords[1], d3.event);
           _this.renderView();
         }
       }
