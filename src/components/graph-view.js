@@ -406,7 +406,7 @@ class GraphView extends Component {
 
       if (!this.props.readOnly && d3.event.shiftKey) {
           var xycoords = d3.mouse(d3.event.target);
-          this.props.onCreateNode(xycoords[0], xycoords[1]);
+          this.props.onCreateNode(xycoords[0], xycoords[1], d3.event);
           this.renderView();
         }
     }
