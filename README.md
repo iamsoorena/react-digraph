@@ -56,7 +56,7 @@ const GraphConfig =  {
       shapeId: "#custom", // relates to the type property of a node
       shape: (
         <symbol viewBox="0 0 50 25" id="custom" key="0">
-          <ellipse cx="50" cy="25" rx="50" ry="25"></circle>
+          <ellipse cx="50" cy="25" rx="50" ry="25"></ellipse>
         </symbol>
       )
     }
@@ -234,6 +234,17 @@ All props are detailed below.
 | showGraphControls   | boolean                 | false     | Whether to show zoom controls.                            |
 | layoutEngineType    | typeof LayoutEngineType | false     | Uses a pre-programmed layout engine, such as 'SnapToGrid' |
 
+### onCreateNode
+You have access to d3 mouse event in `onCreateNode` function.
+```javascript
+  onCreateNode = (x, y, mouseEvent) => {
+    // we can get the exact mouse position when click happens with this line
+    const {pageX, pageY} = mouseEvent;
+    // rest of the code for adding a new node ...
+  };
+```
+
+
 Prop Types:
 ```
   nodes: any[];
@@ -259,7 +270,7 @@ Prop Types:
   selected: any;
   onDeleteNode: (selected: any, nodeId: string, nodes: any[]) => void;
   onSelectNode: (node: INode | null) => void;
-  onCreateNode: (x: number, y: number) => void;
+  onCreateNode: (x: number, y: number, event: object) => void;
   onCreateEdge: (sourceNode: INode, targetNode: INode) => void;
   onDeleteEdge: (selectedEdge: IEdge, edges: IEdge[]) => void;
   onUpdateNode: (node: INode) => void;
