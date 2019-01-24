@@ -531,11 +531,11 @@ class Edge extends React.Component<IEdgeProps> {
 
   renderLabelText (data: any) {
     const [rotation, isRotated] = this.getEdgeHandleRotation()
-    const label_from = typeof(data.label_from) === 'string'? [data.label_from]: data.label_from
-    const label_to = typeof(data.label_to) === 'string'? [data.label_to]: data.label_to
+    const label_from = typeof(data.label_from) === 'string' ? [data.label_from] : data.label_from
+    const label_to = typeof(data.label_to) === 'string' ? [data.label_to] : data.label_to
     const label_numbers = Math.min(label_from.length, label_to.length)
     let titles = []
-    for (let i=0; i<label_numbers; i++) {
+    for (let i = 0; i < label_numbers; i++) {
       titles[i] = isRotated ? `${label_to[i]} ↔ ${label_from[i]}` : `${label_from[i]} ↔ ${label_to[i]}`
     }
     return (
@@ -546,9 +546,9 @@ class Edge extends React.Component<IEdgeProps> {
         style={{fontSize: '11px', stroke: 'none', fill: 'black'}}
         transform={`${this.getEdgeHandleTranslation()} ${rotation} translate(0,-5)`}
       >
-        {titles.map((title, id) => <tspan key={id} x={0} y={-15*id}>{title}</tspan>)}
+        {titles.map((title, id) => <tspan key={id} x={0} y={-15 * id}>{title}</tspan>)}
       </text>
-    );
+    )
   }
 
   render() {
